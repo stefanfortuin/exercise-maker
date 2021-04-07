@@ -21,12 +21,25 @@ class LoginTest extends TestCase
     public function testUserCanLogin()
     {
         $user = User::factory()->create();
-        
+
         $this->post('/login', [
             'email' => $user->email,
             'password' => 'password',
         ]);
 
         $this->assertAuthenticated();
+    }
+
+    public function testUserCanNotLoginWithWrongPassword()
+    {
+        $user = User::factory()->create();
+
+        $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'wrongpassword',
+        ]);
+
+        $this->assertGuest();
+
     }
 }
