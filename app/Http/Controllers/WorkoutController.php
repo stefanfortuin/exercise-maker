@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\Workout;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\WorkoutRequest;
 
 class WorkoutController extends Controller
@@ -38,9 +40,11 @@ class WorkoutController extends Controller
     {
         $validated = $request->validated();
 
-        $workout = Workout::create($validated);
+        $user = User::findOrFail(Auth::id());
+		$workout = $user->workouts()->create($validated);
 
-        return $workout;
+		return redirect('/workouts/' . $workout->id);
+        
     }
 
     /**
