@@ -5,7 +5,7 @@ namespace Tests\Feature;
 use Tests\TestCase;
 use App\Models\User;
 use App\Models\Workout;
-use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -26,6 +26,13 @@ class WorkoutTest extends TestCase
 		$this->assertEquals($user->id, $workout->user_id);
 		$response->assertRedirect('/workouts/' . $workout->id);
 	}
+
+    public function testOnlySavedWorkoutsCanBeShown()
+    {
+        $response = $this->get('/workouts/123');
+
+        $response->assertNotFound();
+    }
 
 	public function testWorkoutCanNotBeCreatedByGuest()
 	{
@@ -69,6 +76,8 @@ class WorkoutTest extends TestCase
 
         $workout = Workout::first();
 
+        Auth::logout();
+
         $response = $this->actingAs($user_other)->patch('/workouts/' . $workout->id, [
             'name' => 'new title',
             'description' => 'new description',
@@ -82,7 +91,6 @@ class WorkoutTest extends TestCase
 
     public function testWorkoutCanBeDeleted()
     {
-        $this->withoutExceptionHandling();
         $user = User::factory()->create();
 
         $this->actingAs($user)->post('/workouts', $this->workoutData());
@@ -94,6 +102,44 @@ class WorkoutTest extends TestCase
 
         $this->assertCount(0, Workout::all());
         $response->assertRedirect('/workouts');
+    }
+
+    public function testWorkoutCanOnlyBeDeletedByOwner()
+    {
+        $user_owner = User::factory()->create();
+        $user_other = User::factory()->create();
+
+        $this->actingAs($user_owner)->post('/workouts', $this->workoutData());
+
+        $workout = Workout::first();
+        $this->assertCount(1, Workout::all());
+
+        Auth::logout();
+
+        $response = $this->actingAs($user_other)->delete('/workouts/' . $workout->id);
+
+        $this->assertCount(1, Workout::all());
+        $response->assertForbidden();
+    }
+
+    public function testWorkoutCanOnlyBeEditedByOwner()
+    {
+        $user_owner = User::factory()->create();
+        $user_other = User::factory()->create();
+
+        $this->actingAs($user_owner)->post('/workouts', $this->workoutData());
+        
+        $workout = Workout::first();
+
+        $response = $this->actingAs($user_owner)->get('/workouts/' . $workout->id .'/edit');
+        // $response->assertLocation('/workouts/' . $workout->id . '/edit');
+        $response->assertViewIs('workout.edit');
+
+        Auth::logout();
+
+        $response = $this->actingAs($user_other)->get('/workouts/' . $workout->id .'/edit');
+
+        $response->assertForbidden();
     }
 
     public function testWorkoutRequiresAName()

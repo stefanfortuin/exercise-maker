@@ -65,7 +65,7 @@ class WorkoutPolicy
      */
     public function delete(User $user, Workout $workout)
     {
-        //
+        return $user->id == $workout->user_id;
     }
 
     /**

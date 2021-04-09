@@ -54,9 +54,9 @@ class WorkoutController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Workout $workout)
     {
-        //
+        return view('workout.show');
     }
 
     /**
@@ -65,9 +65,11 @@ class WorkoutController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Workout $workout)
     {
-        //
+        $this->authorize('update', $workout);
+
+        return view('workout.edit');
     }
 
     /**
@@ -96,6 +98,8 @@ class WorkoutController extends Controller
      */
     public function destroy(Workout $workout)
     {
+        $this->authorize('delete', $workout);
+
         $workout->delete();
 
         return redirect('/workouts');
