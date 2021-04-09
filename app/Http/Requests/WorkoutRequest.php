@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Http\FormRequest;
 
 class WorkoutRequest extends FormRequest
@@ -13,7 +14,7 @@ class WorkoutRequest extends FormRequest
      */
     public function authorize()
     {
-        return auth()->check();
+        return Auth::check();
     }
 
     /**

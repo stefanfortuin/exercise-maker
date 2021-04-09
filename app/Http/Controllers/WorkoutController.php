@@ -40,8 +40,9 @@ class WorkoutController extends Controller
     {
         $validated = $request->validated();
 
-        $user = User::findOrFail(Auth::id());
-		$workout = $user->workouts()->create($validated);
+        $this->authorize('create', Workout::class);
+
+		$workout = $request->user()->workouts()->create($validated);
 
 		return redirect('/workouts/' . $workout->id);
         
@@ -76,9 +77,15 @@ class WorkoutController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(WorkoutRequest $request, Workout $workout)
     {
-        //
+        $validated = $request->validated();
+
+        $this->authorize('update', $workout);
+
+        $workout->update($validated);
+
+        return redirect('/workouts/' . $workout->id);
     }
 
     /**
@@ -87,8 +94,10 @@ class WorkoutController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Workout $workout)
     {
-        //
+        $workout->delete();
+
+        return redirect('/workouts');
     }
 }
