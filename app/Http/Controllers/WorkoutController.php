@@ -10,6 +10,11 @@ use App\Http\Requests\WorkoutRequest;
 
 class WorkoutController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth')->except(['index', 'create', 'show']);
+    }
+
     /**
      * Display a listing of the resource.
      *

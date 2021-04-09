@@ -38,7 +38,7 @@ class WorkoutTest extends TestCase
 	{
 		$response = $this->post('/workouts', $this->workoutData());
 
-		$response->assertForbidden();
+		$response->assertRedirect('/login');
         $this->assertGuest();
 		$this->assertCount(0, Workout::all());
 
