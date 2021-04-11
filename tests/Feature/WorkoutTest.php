@@ -53,13 +53,13 @@ class WorkoutTest extends TestCase
         $workout = Workout::first();
 
         $response = $this->actingAs($user)->patch('/workouts/' . $workout->id, [
-            'name' => 'new title',
+            'title' => 'new title',
             'description' => 'new description',
         ]);
 
         $workout = Workout::first();
 
-        $this->assertEquals('new title', $workout->name);
+        $this->assertEquals('new title', $workout->title);
         $this->assertEquals('new description', $workout->description);
         
         $response->assertRedirect('/workouts/'. $workout->id);
@@ -79,12 +79,12 @@ class WorkoutTest extends TestCase
         Auth::logout();
 
         $response = $this->actingAs($user_other)->patch('/workouts/' . $workout->id, [
-            'name' => 'new title',
+            'title' => 'new title',
             'description' => 'new description',
         ]);
 
         $response->assertForbidden();
-        $this->assertEquals('new workout', Workout::first()->name);
+        $this->assertEquals('new workout', Workout::first()->title);
         $this->assertEquals('description workout', Workout::first()->description);
 
     }
@@ -132,7 +132,6 @@ class WorkoutTest extends TestCase
         $workout = Workout::first();
 
         $response = $this->actingAs($user_owner)->get('/workouts/' . $workout->id .'/edit');
-        // $response->assertLocation('/workouts/' . $workout->id . '/edit');
         $response->assertViewIs('workout.edit');
 
         Auth::logout();
@@ -145,9 +144,9 @@ class WorkoutTest extends TestCase
     public function testWorkoutRequiresAName()
     {
 		$user = User::factory()->create();
-        $response = $this->actingAs($user)->post('/workouts', array_merge($this->workoutData(), ['name' => '']));
+        $response = $this->actingAs($user)->post('/workouts', array_merge($this->workoutData(), ['title' => '']));
         
-        $response->assertSessionHasErrors('name');
+        $response->assertSessionHasErrors('title');
         $this->assertCount(0, Workout::all());
     }
 
@@ -159,10 +158,30 @@ class WorkoutTest extends TestCase
         $this->assertCount(1, Workout::all());
     }
 
+	public function testCheckIfWorkoutIsFromUser()
+	{
+		 $user = User::factory()->create();
+		 $guest = User::factory()->create();
+
+        $this->actingAs($user)->post('/workouts', $this->workoutData());
+
+		$workout = Workout::first();
+
+		$this->assertTrue($workout->mine());
+
+		Auth::logout();
+
+		$this->assertFalse($workout->mine());
+
+		$this->actingAs($guest);
+
+		$this->assertFalse($workout->mine());
+	}
+
     private function workoutData()
     {
         return [
-            'name' => 'new workout',
+            'title' => 'new workout',
             'description' => 'description workout',
         ];
     }

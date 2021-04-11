@@ -25,7 +25,7 @@ class WorkoutRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required',
+            'title' => 'required',
             'description' => '',
         ];
     }

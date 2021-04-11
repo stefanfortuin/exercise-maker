@@ -15,7 +15,7 @@ class CreateWorkoutsTable extends Migration
     {
         Schema::create('workouts', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('title');
             $table->string('description')->nullable();
 			$table->unsignedBigInteger('user_id');
             $table->timestamps();
